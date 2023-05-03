@@ -1,0 +1,23 @@
+controller_url: https://uisp.ffmuc/nms/api/v2.1/devices
+controller_port: 443
+token: t-o-k-en
+multicast_address: ff05::2:1001
+multicast_port: 1001
+interface: bat0
+verbose: True
+multicast_enabled: False
+unicast_address: fe80::f000:25ff:fe10:0
+unicast_port: 45124
+logging_config:
+    formatters:
+      standard:
+        format: '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: standard
+    root:
+      handlers:
+      - console
+      level: DEBUG
+    version: 1

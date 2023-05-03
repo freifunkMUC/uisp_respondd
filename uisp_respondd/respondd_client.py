@@ -106,6 +106,7 @@ class NodeInfo:
     location: LocationInfo
     network: NetworkInfo
 
+
 @dataclasses.dataclass
 class ClientInfo:
     """This class contains the client information of an AP.
@@ -221,7 +222,7 @@ class ResponddClient:
     @property
     def _neighbours(self):
         return self.getNeighbours()
-    
+
     @staticmethod
     def joinMCAST(sock, addr, ifname):
         """Joins a multicast group on a socket."""
@@ -253,8 +254,6 @@ class ResponddClient:
                 )
             )
         return nodes
-
-
 
     def getNeighbours(self):
         """This method returns the neighbour information of all APs."""

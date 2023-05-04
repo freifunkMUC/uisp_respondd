@@ -239,7 +239,6 @@ class ResponddClient:
         aps = self._aps
         nodes = []
         for ap in aps.accesspoints:
-            print(ap.mac)
             nodes.append(
                 NodeInfo(
                     hostname=ap.name,
@@ -285,6 +284,7 @@ class ResponddClient:
         logger.info("Using unicast method")
 
         timeSleep = int(60 - (self._timeStop - self._timeStart) % 60)
+
         if self._config.verbose:
             logger.debug("will now sleep " + str(timeSleep) + " seconds")
         time.sleep(timeSleep)

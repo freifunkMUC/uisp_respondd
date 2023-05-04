@@ -1,0 +1,16 @@
+[Unit]
+Description=uisp_respondd
+After=syslog.target network-online.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+WorkingDirectory=/opt/uisp_respondd
+ExecStart=/opt/uisp_respondd/respondd.py
+Restart=always
+
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
+AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW
+
+[Install]
+WantedBy=multi-user.target

@@ -30,6 +30,7 @@ class Accesspoint:
     neighbour: str
     domain_code: str
 
+
 @dataclasses.dataclass
 class Accesspoints:
     """This class contains the information of all APs.

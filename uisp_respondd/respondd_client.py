@@ -105,6 +105,7 @@ class NodeInfo:
     node_id: str
     location: LocationInfo
     network: NetworkInfo
+    system: SystemInfo
 
 
 @dataclasses.dataclass
@@ -250,6 +251,7 @@ class ResponddClient:
                             "bat0": IntInfo(interfaces=InterfacesInfo(other=[ap.mac]))
                         },
                     ),
+                    system=SystemInfo(domain_code=ap.domain_code),
                 )
             )
         return nodes

@@ -101,9 +101,11 @@ class NodeInfo:
         owner: The owner information of the AP.
         network: The network information of the AP."""
 
+    software: SoftwareInfo
     hostname: str
     node_id: str
     location: LocationInfo
+    hardware: HardwareInfo
     network: NetworkInfo
     system: SystemInfo
 
@@ -177,15 +179,15 @@ class StatisticsInfo:
         memory: The memory information of the AP.
         traffic: The traffic information of the AP."""
 
-    clients: ClientInfo
+    # clients: ClientInfo
     uptime: int
     node_id: str
-    loadavg: float
-    memory: MemoryInfo
-    traffic: TrafficInfo
-    gateway: str
-    gateway6: str
-    gateway_nexthop: str
+    # loadavg: float
+    # memory: MemoryInfo
+    # traffic: TrafficInfo
+    # gateway: str
+    # gateway6: str
+    # gateway_nexthop: str
 
 
 @dataclasses.dataclass
@@ -219,6 +221,10 @@ class ResponddClient:
     @property
     def _nodeinfos(self):
         return self.getNodeInfos()
+    
+    @property
+    def _statistics(self):
+        return self.getStatistics()
 
     @property
     def _neighbours(self):
@@ -242,9 +248,13 @@ class ResponddClient:
         for ap in aps.accesspoints:
             nodes.append(
                 NodeInfo(
+                    software=SoftwareInfo(
+                        firmware=FirmwareInfo(base="Unifi", release=ap.firmware),
+                    ),
                     hostname=ap.name,
                     node_id=ap.mac.replace(":", ""),
                     location=LocationInfo(latitude=ap.latitude, longitude=ap.longitude),
+                    hardware=HardwareInfo(model=ap.model),
                     network=NetworkInfo(
                         mac=ap.mac,
                         mesh={
@@ -274,6 +284,19 @@ class ResponddClient:
                             )
                         )
         return neighbours
+
+    def getStatistics(self):
+        """This method returns the statistics information of all APs."""
+        aps = self._aps
+        statistics = []
+        for ap in aps.accesspoints:
+            statistics.append(
+                StatisticsInfo(
+                    uptime=ap.uptime,
+                    node_id=ap.mac.replace(":", ""),
+                )
+            )
+        return statistics
 
     def listenMulticast(self):
         msg, sourceAddress = self._sock.recvfrom(2048)
@@ -343,6 +366,8 @@ class ResponddClient:
         """This method builds the response structure."""
 
         responseClass = None
+        if responseType == "statistics":
+            responseClass = self._statistics
         if responseType == "nodeinfo":
             responseClass = self._nodeinfos
         elif responseType == "neighbours":

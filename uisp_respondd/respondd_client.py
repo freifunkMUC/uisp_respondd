@@ -221,7 +221,7 @@ class ResponddClient:
     @property
     def _nodeinfos(self):
         return self.getNodeInfos()
-    
+
     @property
     def _statistics(self):
         return self.getStatistics()

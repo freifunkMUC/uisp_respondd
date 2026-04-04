@@ -179,11 +179,10 @@ class StatisticsInfo:
         memory: The memory information of the AP.
         traffic: The traffic information of the AP."""
 
-    # clients: ClientInfo
     uptime: int
     node_id: str
-    # loadavg: float
-    # memory: MemoryInfo
+    loadavg: float
+    memory: MemoryInfo
     # traffic: TrafficInfo
     # gateway: str
     # gateway6: str
@@ -290,10 +289,16 @@ class ResponddClient:
         aps = self._aps
         statistics = []
         for ap in aps.accesspoints:
+            ram_used_percent = max(0, min(ap.ram_used_percent, 100))
+            ram_free_percent = 100 - ram_used_percent
             statistics.append(
                 StatisticsInfo(
                     uptime=ap.uptime,
                     node_id=ap.mac.replace(":", ""),
+                    # UISP does not expose loadavg in this environment; map CPU usage to a stable pseudo-load value.
+                    loadavg=round(ap.cpu / 100.0, 2),
+                    # Meshviewer computes memory usage from total/free/buffers.
+                    memory=MemoryInfo(total=100, free=ram_free_percent, buffers=0),
                 )
             )
         return statistics

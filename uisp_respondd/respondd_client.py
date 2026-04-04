@@ -10,7 +10,7 @@ import dataclasses
 from dataclasses_json import dataclass_json
 from uisp_respondd import uisp_client
 from uisp_respondd import logger
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 @dataclasses.dataclass
@@ -179,10 +179,10 @@ class StatisticsInfo:
         memory: The memory information of the AP.
         traffic: The traffic information of the AP."""
 
-    uptime: int
     node_id: str
-    loadavg: float
-    memory: MemoryInfo
+    uptime: Optional[int] = None
+    loadavg: Optional[float] = None
+    memory: Optional[MemoryInfo] = None
     # traffic: TrafficInfo
     # gateway: str
     # gateway6: str
@@ -289,16 +289,32 @@ class ResponddClient:
         aps = self._aps
         statistics = []
         for ap in aps.accesspoints:
-            ram_used_percent = max(0, min(ap.ram_used_percent, 100))
-            ram_free_percent = 100 - ram_used_percent
+            # Some UISP devices are blackBox/inventory-only and do not expose telemetry.
+            # Keep nodes only when we have at least one meaningful metric.
+            has_uptime = ap.uptime is not None
+            has_ram = ap.ram_used_percent is not None
+            has_load = ap.loadavg is not None
+            if not has_uptime and not has_ram and not has_load:
+                logger.debug(
+                    "Skipping statistics for %s (%s): missing uptime/load/ram telemetry",
+                    ap.name,
+                    ap.mac,
+                )
+                continue
+
+            memory = None
+            if has_ram:
+                ram_used_percent = max(0, min(ap.ram_used_percent, 100))
+                ram_free_percent = 100 - ram_used_percent
+                # Meshviewer computes memory usage from total/free/buffers.
+                memory = MemoryInfo(total=100, free=ram_free_percent, buffers=0)
+
             statistics.append(
                 StatisticsInfo(
                     uptime=ap.uptime,
                     node_id=ap.mac.replace(":", ""),
-                    # UISP does not expose loadavg in this environment; map CPU usage to a stable pseudo-load value.
-                    loadavg=round(ap.cpu / 100.0, 2),
-                    # Meshviewer computes memory usage from total/free/buffers.
-                    memory=MemoryInfo(total=100, free=ram_free_percent, buffers=0),
+                    loadavg=round(ap.loadavg, 2) if ap.loadavg is not None else None,
+                    memory=memory,
                 )
             )
         return statistics

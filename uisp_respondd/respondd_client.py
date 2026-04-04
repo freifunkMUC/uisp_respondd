@@ -303,24 +303,27 @@ class ResponddClient:
                 and not has_load
                 and not has_traffic
                 and not has_clients
+                and str(ap.device_type).lower() == "blackbox"
             ):
                 logger.debug(
-                    "Skipping statistics for %s (%s): missing uptime/load/ram/traffic/client telemetry",
+                    "Skipping statistics for %s (%s): missing telemetry and blackBox type",
                     ap.name,
                     ap.mac,
                 )
                 continue
 
-            memory = None
             if has_ram:
                 ram_used_percent = max(0, min(ap.ram_used_percent, 100))
                 ram_free_percent = 100 - ram_used_percent
                 # Meshviewer computes memory usage from total/free/buffers.
                 memory = MemoryInfo(total=100, free=ram_free_percent, buffers=0)
+            else:
+                # Avoid NaN in downstream renderers when memory telemetry is unavailable.
+                memory = MemoryInfo(total=100, free=100, buffers=0)
 
             statistics.append(
                 StatisticsInfo(
-                    uptime=ap.uptime,
+                    uptime=ap.uptime if ap.uptime is not None else 0,
                     node_id=ap.mac.replace(":", ""),
                     clients=(
                         ClientInfo(
@@ -332,7 +335,7 @@ class ResponddClient:
                         if has_clients
                         else None
                     ),
-                    loadavg=round(ap.loadavg, 2) if ap.loadavg is not None else None,
+                    loadavg=round(ap.loadavg, 2) if ap.loadavg is not None else 0.0,
                     memory=memory,
                     traffic=(
                         TrafficInfo(

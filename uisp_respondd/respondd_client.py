@@ -291,26 +291,29 @@ class ResponddClient:
         statistics = []
         for ap in aps.accesspoints:
             # Some UISP devices are blackBox/inventory-only and do not expose telemetry.
-            # Keep nodes only when we have at least one meaningful metric.
+            # For these, emit safe defaults so they appear online (not offline) in meshviewer.
             has_uptime = ap.uptime is not None
             has_ram = ap.ram_used_percent is not None
             has_load = ap.loadavg is not None
             has_traffic = ap.tx_bytes is not None or ap.rx_bytes is not None
             has_clients = ap.client_total is not None
-            if (
+
+            # Always emit statistics, use safe defaults for missing telemetry
+            is_zero_telemetry = (
                 not has_uptime
                 and not has_ram
                 and not has_load
                 and not has_traffic
                 and not has_clients
                 and str(ap.device_type).lower() == "blackbox"
-            ):
+            )
+
+            if is_zero_telemetry:
                 logger.debug(
-                    "Skipping statistics for %s (%s): missing telemetry and blackBox type",
+                    "Emitting safe defaults for %s (%s): blackBox with no telemetry",
                     ap.name,
                     ap.mac,
                 )
-                continue
 
             if has_ram:
                 ram_used_percent = max(0, min(ap.ram_used_percent, 100))

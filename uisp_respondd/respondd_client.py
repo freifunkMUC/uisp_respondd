@@ -373,7 +373,7 @@ class ResponddClient:
         responseClass = None
         if responseType == "statistics":
             responseClass = self._statistics
-        if responseType == "nodeinfo":
+        elif responseType == "nodeinfo":
             responseClass = self._nodeinfos
         elif responseType == "neighbours":
             responseClass = self._neighbours

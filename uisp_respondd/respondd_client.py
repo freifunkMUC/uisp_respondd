@@ -297,7 +297,13 @@ class ResponddClient:
             has_load = ap.loadavg is not None
             has_traffic = ap.tx_bytes is not None or ap.rx_bytes is not None
             has_clients = ap.client_total is not None
-            if not has_uptime and not has_ram and not has_load and not has_traffic and not has_clients:
+            if (
+                not has_uptime
+                and not has_ram
+                and not has_load
+                and not has_traffic
+                and not has_clients
+            ):
                 logger.debug(
                     "Skipping statistics for %s (%s): missing uptime/load/ram/traffic/client telemetry",
                     ap.name,
@@ -316,18 +322,30 @@ class ResponddClient:
                 StatisticsInfo(
                     uptime=ap.uptime,
                     node_id=ap.mac.replace(":", ""),
-                    clients=ClientInfo(
-                        total=ap.client_total,
-                        wifi=ap.client_total,
-                        wifi24=0,
-                        wifi5=0,
-                    ) if has_clients else None,
+                    clients=(
+                        ClientInfo(
+                            total=ap.client_total,
+                            wifi=ap.client_total,
+                            wifi24=0,
+                            wifi5=0,
+                        )
+                        if has_clients
+                        else None
+                    ),
                     loadavg=round(ap.loadavg, 2) if ap.loadavg is not None else None,
                     memory=memory,
-                    traffic=TrafficInfo(
-                        tx=txInfo(bytes=ap.tx_bytes if ap.tx_bytes is not None else 0),
-                        rx=rxInfo(bytes=ap.rx_bytes if ap.rx_bytes is not None else 0),
-                    ) if has_traffic else None,
+                    traffic=(
+                        TrafficInfo(
+                            tx=txInfo(
+                                bytes=ap.tx_bytes if ap.tx_bytes is not None else 0
+                            ),
+                            rx=rxInfo(
+                                bytes=ap.rx_bytes if ap.rx_bytes is not None else 0
+                            ),
+                        )
+                        if has_traffic
+                        else None
+                    ),
                 )
             )
         return statistics

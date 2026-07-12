@@ -249,7 +249,7 @@ class ResponddClient:
             nodes.append(
                 NodeInfo(
                     software=SoftwareInfo(
-                        firmware=FirmwareInfo(base="Unifi", release=ap.firmware),
+                        firmware=FirmwareInfo(base="UniFi", release=ap.firmware),
                     ),
                     hostname=ap.name,
                     node_id=ap.mac.replace(":", ""),
